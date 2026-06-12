@@ -1,0 +1,19 @@
+name = "bochannel-api"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Create the namespace with:  wrangler kv namespace create BOCHA_KV
+# then paste the returned id below.
+kv_namespaces = [
+  { binding = "BOCHA_KV", id = "PASTE_YOUR_KV_NAMESPACE_ID_HERE" }
+]
+
+[vars]
+# Your GitHub Pages origin (no trailing slash). Use "*" only while testing.
+# Multiple origins allowed, comma-separated.
+ALLOW_ORIGIN = "https://YOUR_USERNAME.github.io"
+BOARD = "vocaloid"
+
+# Secrets are NOT stored here. Set them once with wrangler:
+#   wrangler secret put ADMIN_KEY   # password for admin.html
+#   wrangler secret put ID_SALT     # any random string (salts poster IDs)
