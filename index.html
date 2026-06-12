@@ -373,6 +373,47 @@ img{ max-width:100%; }
 #pullRefresh.ready .pr__spin{ transform:rotate(180deg); transition:transform .2s; }
 #pullRefresh.loading .pr__spin{ animation:spin .7s linear infinite; }
 
+/* ===== first-visit rules modal ===== */
+.rules-wrap{ position:fixed; inset:0; z-index:100; display:none; }
+.rules-wrap.open{ display:block; }
+.rules-back{ position:absolute; inset:0; background:rgba(8,30,32,.55); backdrop-filter:blur(2px); animation:fade .2s; }
+.rules{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:min(420px, calc(100vw - 32px)); max-height:88vh; overflow:auto;
+  background:#fff; border-radius:18px; padding:0 0 18px;
+  box-shadow:0 20px 60px rgba(8,40,38,.4); animation:rulespop .3s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes rulespop{ from{ opacity:0; transform:translate(-50%,-46%) scale(.94);} to{ opacity:1; transform:translate(-50%,-50%) scale(1);} }
+.rules__hd{
+  background:linear-gradient(135deg,var(--miku),var(--miku-dark));
+  color:#fff; padding:22px 22px 18px; border-radius:18px 18px 0 0; text-align:center;
+}
+.rules__mark{ font-size:34px; line-height:1; }
+.rules__ttl{ font-family:var(--round); font-weight:800; font-size:20px; margin-top:8px; }
+.rules__sub{ font-size:12px; opacity:.9; margin-top:3px; }
+.rules__body{ padding:18px 20px 4px; }
+.rules__lead{ font-size:13px; color:var(--ink-soft); margin:0 0 14px; line-height:1.7; }
+.rule{ display:flex; gap:11px; align-items:flex-start; padding:9px 0; border-bottom:1px solid var(--line-2); }
+.rule:last-child{ border-bottom:none; }
+.rule__no{ flex:0 0 auto; width:24px; height:24px; border-radius:8px; background:#e9f7f5; color:var(--miku-deep);
+  font-family:var(--round); font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; }
+.rule__no.warn{ background:#ffe7ec; color:#cf3b6a; }
+.rule__tx{ font-size:13.5px; line-height:1.55; color:#243033; }
+.rule__tx b{ color:#152e32; }
+.rules__foot{ padding:14px 20px 0; }
+.rules__agree{ display:flex; align-items:center; gap:9px; font-size:13px; color:var(--ink-soft); cursor:pointer; user-select:none; margin-bottom:12px; }
+.rules__agree input{ width:19px; height:19px; accent-color:var(--miku-dark); flex:0 0 auto; }
+.rules__btn{
+  width:100%; height:48px; border:none; border-radius:13px; cursor:pointer;
+  font-family:var(--jp); font-weight:800; font-size:15px; color:#fff;
+  background:linear-gradient(180deg,var(--miku),var(--miku-dark));
+  box-shadow:0 6px 16px rgba(27,163,152,.4); transition:opacity .15s;
+}
+.rules__btn:disabled{ opacity:.4; box-shadow:none; cursor:not-allowed; }
+.rules__btn:active:not(:disabled){ transform:translateY(1px); }
+.rules__mini{ text-align:center; font-size:11px; color:var(--ink-faint); margin-top:10px; }
+.rules__mini a{ color:var(--miku-dark); cursor:pointer; }
+
 </style>
 </head>
 <body>
@@ -417,6 +458,31 @@ img{ max-width:100%; }
   <!-- composer sheet mount -->
   <div class="sheet-wrap" id="sheetWrap"></div>
 
+  <!-- first-visit rules modal -->
+  <div class="rules-wrap" id="rulesWrap">
+    <div class="rules-back"></div>
+    <div class="rules" role="dialog" aria-modal="true" aria-labelledby="rulesTtl">
+      <div class="rules__hd">
+        <div class="rules__mark">🎤</div>
+        <div class="rules__ttl" id="rulesTtl">ぼちゃんねるへようこそ</div>
+        <div class="rules__sub">ボカロ・ボカブキ専門掲示板</div>
+      </div>
+      <div class="rules__body">
+        <p class="rules__lead">みんなが気持ちよく使える場所にするため、書き込む前に下のルールを確認してね。</p>
+        <div class="rule"><div class="rule__no">1</div><div class="rule__tx"><b>ボカロ・ボカブキの話題だけ</b><br>それ以外の雑談・宣伝・無関係な話題は控えてください。</div></div>
+        <div class="rule"><div class="rule__no warn">2</div><div class="rule__tx"><b>個人名を出さない</b><br>本名や特定につながる個人情報の書き込みは禁止です。</div></div>
+        <div class="rule"><div class="rule__no warn">3</div><div class="rule__tx"><b>誹謗中傷をしない</b><br>悪口・煽り・人を傷つける書き込みはやめましょう。</div></div>
+        <div class="rule"><div class="rule__no">4</div><div class="rule__tx"><b>ネタバレ・無断転載に配慮</b><br>外部の権利物の無断転載や過度なネタバレは避けてください。</div></div>
+        <div class="rule"><div class="rule__no">5</div><div class="rule__tx"><b>みんな匿名「名無しのボカロP」</b><br>連投・荒らしは規制対象です。マナーを守って楽しもう。</div></div>
+      </div>
+      <div class="rules__foot">
+        <label class="rules__agree"><input type="checkbox" id="rulesChk">上記のルールに同意します</label>
+        <button class="rules__btn" id="rulesOk" disabled>同意して始める</button>
+        <div class="rules__mini"><a id="rulesAgain">ルールをもう一度表示</a></div>
+      </div>
+    </div>
+  </div>
+
   <script>
 /* ===========================================================
    ぼちゃんねる — data layer
@@ -434,7 +500,7 @@ img{ max-width:100%; }
   //   e.g. "https://bochannel-api.yourname.workers.dev"
   // ---------------------------------------------------------
   const CONFIG = {
-    API_BASE: "https://bochannel-api.dragxonx3.workers.dev",          // Cloudflare Worker origin, no trailing slash
+    API_BASE: "",          // Cloudflare Worker origin, no trailing slash
     BOARD: "vocaloid",
     BOARD_NAME: "ボーカロイド総合",
   };
@@ -894,6 +960,7 @@ img{ max-width:100%; }
   function footer(){
     return `<div class="foot">
       ぼちゃんねる — Vocaloid BBS<br>
+      <a onclick="window.__showRules&&window.__showRules();return false" href="#">利用ルール</a> ・
       ${API.isDemo()
         ? 'デモ表示中（ブラウザ内に保存）・ <a href="admin.html">管理画面</a>'
         : '<a href="admin.html">管理画面</a>'}
@@ -946,18 +1013,6 @@ img{ max-width:100%; }
             <input id="fTitle" maxlength="80" placeholder="例）作業用に最適なボカロ曲を語るスレ" autocomplete="off">
           </div>`:""}
         <div class="field">
-          <div class="row">
-            <div>
-              <label>名前</label>
-              <input id="fName" maxlength="40" placeholder="名無しのボカロP" autocomplete="off">
-            </div>
-            <div>
-              <label>メール</label>
-              <input id="fMail" maxlength="40" placeholder="sage で下げ" autocomplete="off">
-            </div>
-          </div>
-        </div>
-        <div class="field">
           <label>本文</label>
           <textarea id="fBody" maxlength="2000" placeholder="${mode==="thread"?"スレッドの最初の書き込みを入力…":"本文を入力…  >>番号 で安価できます"}">${esc(quote)}</textarea>
           <div class="hint"><span id="cCount">0</span>/2000　・　&gt;&gt;番号 で安価、行頭 &gt; で引用</div>
@@ -983,8 +1038,9 @@ img{ max-width:100%; }
     const err = $("#cErr");
     const show = (m)=>{ err.textContent=m; err.classList.add("show"); };
     err.classList.remove("show");
-    const name = $("#fName").value, mail = $("#fMail").value, bodyV = $("#fBody").value.trim();
+    const bodyV = $("#fBody").value.trim();
     if (!bodyV){ show("本文を入力してください"); return; }
+    const name = "", mail = "";
     const btn = $("#cSubmit"); btn.disabled = true; btn.textContent = "送信中…";
     try{
       if (mode==="thread"){
@@ -1150,6 +1206,31 @@ img{ max-width:100%; }
 
     window.addEventListener("touchend", finish, { passive:true });
     window.addEventListener("touchcancel", reset, { passive:true });
+  })();
+
+  // ---------------------------------------------------------
+  // FIRST-VISIT RULES MODAL
+  // ---------------------------------------------------------
+  (function setupRules(){
+    const wrap = $("#rulesWrap");
+    if (!wrap) return;
+    const chk = $("#rulesChk"), ok = $("#rulesOk"), again = $("#rulesAgain");
+    const KEY = "bochannel_rules_agreed_v1";
+    function open(force){
+      if (!force){ try{ if (localStorage.getItem(KEY)) return; }catch(_){} }
+      chk.checked = false; ok.disabled = true;
+      wrap.classList.add("open");
+    }
+    function close(){
+      wrap.classList.remove("open");
+      try{ localStorage.setItem(KEY, String(Date.now())); }catch(_){}
+    }
+    chk.addEventListener("change", ()=> ok.disabled = !chk.checked);
+    ok.addEventListener("click", ()=>{ if (chk.checked) close(); });
+    again.addEventListener("click", (e)=>{ e.preventDefault(); open(true); });
+    // expose so the footer link can reopen it too
+    window.__showRules = ()=> open(true);
+    open(false);
   })();
 
   // boot
