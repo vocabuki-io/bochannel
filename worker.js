@@ -69,7 +69,9 @@ export default {
       if (p === "/" || p === "/api") return json({ ok: true, name: "ぼちゃんねる API", board: cfg(env).BOARD }, 200, cors);
       return json({ error: "not found" }, 404, cors);
     } catch (e) {
-      return json({ error: e.message || "internal error", retryAfter: e.retryAfter }, e.status || 500, cors);
+      const st = e instanceof ApiError ? e.status : 500;
+      const ra = e instanceof ApiError ? e.retryAfter : 0;
+      return json({ error: e.message || "internal error", retryAfter: ra }, st, cors);
     }
   },
 };
@@ -100,7 +102,14 @@ function json(obj, status, cors) {
     status, headers: { "Content-Type": "application/json; charset=utf-8", ...cors },
   });
 }
-function fail(msg, status, retryAfter) { const e = new Error(msg); e.status = status; if (retryAfter) e.retryAfter = retryAfter; return e; }
+class ApiError extends Error {
+  constructor(msg, status, retryAfter) {
+    super(msg);
+    this.status = status || 500;
+    this.retryAfter = retryAfter || 0;
+  }
+}
+function fail(msg, status, retryAfter) { return new ApiError(msg, status, retryAfter); }
 function isAdmin(request, env) {
   const key = request.headers.get("x-admin-key") || "";
   return env.ADMIN_KEY && key && timingSafeEqual(key, env.ADMIN_KEY);
@@ -144,9 +153,10 @@ async function rateLimit(env, ip, kind, intervalMs) {
   const last = await env.BOCHA_KV.get(key);
   const now = Date.now();
   if (last && now - Number(last) < intervalMs) {
-    throw fail("連投規制中です。少し待ってから書き込んでください", 429, Math.ceil((intervalMs - (now - Number(last))) / 1000));
+    const sec = Math.ceil((intervalMs - (now - Number(last))) / 1000);
+    throw fail("連投規制中です。少し待ってから書き込んでください", 429, sec);
   }
-  await env.BOCHA_KV.put(key, String(now), { expirationTtl: Math.ceil(intervalMs / 1000) + 5 });
+  await env.BOCHA_KV.put(key, String(now), { expirationTtl: Math.max(60, Math.ceil(intervalMs / 1000) + 5) });
 }
 
 /* ------------------------------ KV model -------------------------- */
