@@ -176,7 +176,7 @@ img{ max-width:100%; }
 .thread:nth-child(3) .thread__rank{ color:#caa06a; }
 .thread__body{ min-width:0; flex:1; }
 .thread__title{
-  font-size:15px; font-weight:600; color:#173b46; line-height:1.4;
+  font-size: calc(15px * var(--fs,1)); font-weight:600; color:#173b46; line-height:1.4;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 .thread:active .thread__title{ color:var(--miku-deep); }
@@ -234,7 +234,7 @@ img{ max-width:100%; }
 .post__id.many{ color:var(--rin); font-weight:700; }
 .post__sage{ color:var(--sage); font-size:10.5px; border:1px solid var(--line); border-radius:4px; padding:0 4px; }
 .post__body{
-  font-size:15px; line-height:1.72; white-space:pre-wrap; word-break:break-word;
+  font-size: calc(15px * var(--fs,1)); line-height:1.72; white-space:pre-wrap; word-break:break-word;
   margin-left:2px; color:#222b2d;
 }
 .post__body .anchor{ color:var(--anchor); cursor:pointer; border-bottom:1px dotted var(--anchor); }
@@ -401,6 +401,16 @@ img{ max-width:100%; }
 .rule__tx{ font-size:13.5px; line-height:1.55; color:#243033; }
 .rule__tx b{ color:#152e32; }
 .rules__foot{ padding:14px 20px 0; }
+.rules__nick{ margin-bottom:14px; }
+.rules__nick label{ display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:5px; }
+.rules__nick label span{ color:var(--ink-faint); font-weight:600; }
+.rules__nick input{
+  width:100%; border:1px solid var(--line); border-radius:11px; padding:11px 13px;
+  font-family:var(--jp); font-size:15px; color:var(--ink); background:var(--panel-2); outline:none;
+  transition:border-color .15s, background .15s;
+}
+.rules__nick input:focus{ border-color:var(--miku); background:#fff; }
+.rules__nickhint{ font-size:11px; color:var(--ink-faint); margin-top:5px; line-height:1.5; }
 .rules__agree{ display:flex; align-items:center; gap:9px; font-size:13px; color:var(--ink-soft); cursor:pointer; user-select:none; margin-bottom:12px; }
 .rules__agree input{ width:19px; height:19px; accent-color:var(--miku-dark); flex:0 0 auto; }
 .rules__btn{
@@ -413,6 +423,34 @@ img{ max-width:100%; }
 .rules__btn:active:not(:disabled){ transform:translateY(1px); }
 .rules__mini{ text-align:center; font-size:11px; color:var(--ink-faint); margin-top:10px; }
 .rules__mini a{ color:var(--miku-dark); cursor:pointer; }
+
+/* ===== settings screen ===== */
+.settings{ padding:8px 0 96px; }
+.set-group{ margin:14px 0; background:#fff; }
+.set-group__t{ font-size:11.5px; font-weight:800; letter-spacing:.4px; color:var(--ink-faint); padding:0 16px 6px; }
+.set-card{ background:#fff; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+.set-row{ padding:13px 16px; border-bottom:1px solid var(--line-2); }
+.set-row:last-child{ border-bottom:none; }
+.set-row__lab{ font-size:13.5px; font-weight:700; color:#243033; margin-bottom:3px; }
+.set-row__hint{ font-size:11.5px; color:var(--ink-faint); margin-top:4px; line-height:1.5; }
+.set-row input[type=text], .set-row textarea{
+  width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px;
+  font-family:var(--jp); font-size:15px; color:var(--ink); background:var(--panel-2); outline:none;
+}
+.set-row input[type=text]:focus, .set-row textarea:focus{ border-color:var(--miku); background:#fff; }
+.set-row textarea{ min-height:84px; resize:vertical; line-height:1.6; }
+.seg{ display:flex; gap:6px; margin-top:8px; }
+.seg button{
+  flex:1; border:1px solid var(--line); background:#fff; border-radius:9px; padding:8px 4px; cursor:pointer;
+  font-family:var(--jp); font-weight:700; font-size:12.5px; color:var(--ink-soft);
+}
+.seg button[aria-pressed="true"]{ background:var(--miku); border-color:var(--miku); color:#fff; box-shadow:0 2px 6px rgba(27,163,152,.35); }
+.set-sample{ margin-top:10px; padding:11px 13px; background:var(--panel-2); border-radius:10px; border:1px solid var(--line-2);
+  font-size: calc(15px * var(--fs,1)); line-height:1.7; color:#222b2d; }
+.set-danger{ color:#cf3b2f; }
+.set-link{ display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+.set-link .chev{ color:var(--ink-faint); }
+.set-save{ position:sticky; bottom:0; }
 
 </style>
 </head>
@@ -429,6 +467,9 @@ img{ max-width:100%; }
       <div class="hdr__spacer"></div>
       <button class="hdr__btn" id="hdrSearch" aria-label="検索">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
+      <button class="hdr__btn" id="hdrSettings" aria-label="設定">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.6a1.5 1.5 0 0 0 .3 1.6l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.5 1.5 0 0 0-2.5 1v.2a2 2 0 1 1-4 0v-.1A1.5 1.5 0 0 0 8.6 19a1.5 1.5 0 0 0-1.6.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.5 1.5 0 0 0-1-2.5H3a2 2 0 1 1 0-4h.1A1.5 1.5 0 0 0 5 8.6a1.5 1.5 0 0 0-.3-1.6l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.5 1.5 0 0 0 1.6.3H9a1.5 1.5 0 0 0 1-1.4V3a2 2 0 1 1 4 0v.1a1.5 1.5 0 0 0 2.5 1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.5 1.5 0 0 0-.3 1.6V9a1.5 1.5 0 0 0 1.4 1H21a2 2 0 1 1 0 4h-.1a1.5 1.5 0 0 0-1.4 1z"/></svg>
       </button>
     </header>
 
@@ -476,6 +517,11 @@ img{ max-width:100%; }
         <div class="rule"><div class="rule__no">5</div><div class="rule__tx"><b>みんな匿名「名無しのボカロP」</b><br>連投・荒らしは規制対象です。マナーを守って楽しもう。</div></div>
       </div>
       <div class="rules__foot">
+        <div class="rules__nick">
+          <label for="rulesNick">ニックネーム<span>（任意）</span></label>
+          <input id="rulesNick" maxlength="24" placeholder="名無しのボカロP" autocomplete="off">
+          <div class="rules__nickhint">未入力なら「名無しのボカロP」で投稿されます。あとから設定で変更できます。</div>
+        </div>
         <label class="rules__agree"><input type="checkbox" id="rulesChk">上記のルールに同意します</label>
         <button class="rules__btn" id="rulesOk" disabled>同意して始める</button>
         <div class="rules__mini"><a id="rulesAgain">ルールをもう一度表示</a></div>
@@ -733,6 +779,35 @@ img{ max-width:100%; }
 
   const state = { view: "list", tab: "ikioi", threads: [], thread: null, search: "" };
 
+  // ---------------------------------------------------------
+  // USER PREFERENCES (localStorage)
+  // ---------------------------------------------------------
+  const Prefs = (function(){
+    const KEY = "bochannel_prefs_v1";
+    const DEF = { nick: "", fontScale: 1, defaultTab: "ikioi", ngWords: [], hideId: [] };
+    let cache = null;
+    function get(){
+      if (cache) return cache;
+      let p = {};
+      try { p = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(_){}
+      cache = { ...DEF, ...p };
+      return cache;
+    }
+    function set(patch){
+      cache = { ...get(), ...patch };
+      try { localStorage.setItem(KEY, JSON.stringify(cache)); } catch(_){}
+      apply();
+      return cache;
+    }
+    function apply(){
+      const p = get();
+      document.documentElement.style.setProperty("--fs", p.fontScale || 1);
+    }
+    return { get, set, apply };
+  })();
+  Prefs.apply();
+
+
   const root = $("#view");
   const elBack = $("#back");
   const elBrand = $("#brand");
@@ -798,6 +873,7 @@ img{ max-width:100%; }
     const h = location.hash.replace(/^#/, "");
     if (h.startsWith("/thread/")) return { name:"thread", id: decodeURIComponent(h.slice(8)) };
     if (h === "/new") return { name:"new" };
+    if (h === "/settings") return { name:"settings" };
     return { name:"list" };
   }
   window.addEventListener("hashchange", route);
@@ -805,6 +881,7 @@ img{ max-width:100%; }
   async function route(){
     const r = parseHash();
     if (r.name === "thread") return showThread(r.id);
+    if (r.name === "settings") return showSettings();
     if (r.name === "new") { showList(); openComposer({mode:"thread"}); return; }
     return showList();
   }
@@ -820,6 +897,7 @@ img{ max-width:100%; }
     elTabs.style.display = "flex";
     elBanner.style.display = "flex";
     $("#hdrSearch").style.display = "flex";
+    $("#hdrSettings").style.display = "flex";
     window.scrollTo(0,0);
 
     root.innerHTML = `<div class="loading"><div class="spinner"></div>スレッドを読み込み中…</div>`;
@@ -844,6 +922,123 @@ img{ max-width:100%; }
           ${API.isDemo() ? '<span style="color:#c8631a">● DEMOモード</span>' : '<span style="color:#1f8a4c">● LIVE</span>'}
         </div>
       </div>`;
+  }
+
+  // ---------------------------------------------------------
+  // SETTINGS VIEW
+  // ---------------------------------------------------------
+  function showSettings(){
+    state.view = "settings";
+    elBack.classList.add("show");
+    elBrand.style.display = "none";
+    elTitle.style.display = "block";
+    elTitle.textContent = "設定";
+    elTabs.style.display = "none";
+    elBanner.style.display = "none";
+    elSearch.classList.remove("open");
+    $("#hdrSearch").style.display = "none";
+    $("#hdrSettings").style.display = "none";
+    window.scrollTo(0,0);
+
+    const p = Prefs.get();
+    const scales = [["小",0.9],["標準",1],["大",1.15],["特大",1.3]];
+    const tabs = [["ikioi","勢い順"],["update","新着レス"],["new","新規スレ"]];
+    root.innerHTML = `
+      <div class="settings">
+        <div class="set-group">
+          <div class="set-group__t">プロフィール</div>
+          <div class="set-card">
+            <div class="set-row">
+              <div class="set-row__lab">ニックネーム</div>
+              <input type="text" id="sNick" maxlength="24" placeholder="名無しのボカロP" value="${esc(p.nick||"")}">
+              <div class="set-row__hint">書き込み時に表示される名前です。未入力なら「名無しのボカロP」になります。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="set-group">
+          <div class="set-group__t">表示</div>
+          <div class="set-card">
+            <div class="set-row">
+              <div class="set-row__lab">文字サイズ</div>
+              <div class="seg" id="sScale">
+                ${scales.map(([l,v])=>`<button data-v="${v}" aria-pressed="${(p.fontScale||1)==v}">${l}</button>`).join("")}
+              </div>
+              <div class="set-sample" id="sSample">サンプル：初音ミクの曲っていいよね🎵</div>
+            </div>
+            <div class="set-row">
+              <div class="set-row__lab">最初に表示する並び順</div>
+              <div class="seg" id="sTab">
+                ${tabs.map(([k,l])=>`<button data-v="${k}" aria-pressed="${(p.defaultTab||"ikioi")===k}">${l}</button>`).join("")}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="set-group">
+          <div class="set-group__t">NGワード（あぼ〜ん）</div>
+          <div class="set-card">
+            <div class="set-row">
+              <div class="set-row__lab">非表示にする単語</div>
+              <textarea id="sNg" placeholder="1行に1つ&#10;例）ネタバレ">${esc((p.ngWords||[]).join("\n"))}</textarea>
+              <div class="set-row__hint">この単語を含む書き込みは「あぼ〜ん」表示になります（自分の端末のみ）。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="set-group">
+          <div class="set-group__t">その他</div>
+          <div class="set-card">
+            <div class="set-row set-link" id="sRules">
+              <div><div class="set-row__lab">利用ルールを見る</div></div>
+              <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+            </div>
+            <div class="set-row set-link" id="sReset">
+              <div><div class="set-row__lab set-danger">データを初期化</div>
+                <div class="set-row__hint">ニックネーム・設定・閲覧データを消去します。</div></div>
+              <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="set-group">
+          <div class="set-card"><div class="set-row" style="padding:14px 16px;">
+            <button class="rules__btn" id="sSave">保存する</button>
+          </div></div>
+        </div>
+      </div>` + footer();
+
+    $("#sScale").addEventListener("click",(e)=>{
+      const b=e.target.closest("button"); if(!b) return;
+      [...e.currentTarget.children].forEach(x=>x.setAttribute("aria-pressed", x===b));
+      Prefs.set({ fontScale: Number(b.dataset.v) });
+    });
+    $("#sTab").addEventListener("click",(e)=>{
+      const b=e.target.closest("button"); if(!b) return;
+      [...e.currentTarget.children].forEach(x=>x.setAttribute("aria-pressed", x===b));
+    });
+    $("#sRules").addEventListener("click", ()=> window.__showRules && window.__showRules());
+    $("#sReset").addEventListener("click", ()=>{
+      if (!confirm("ニックネームと設定・閲覧データを初期化します。よろしいですか？")) return;
+      try{
+        localStorage.removeItem("bochannel_prefs_v1");
+        localStorage.removeItem("bochannel_rules_agreed_v1");
+      }catch(_){}
+      Prefs.set({ nick:"", fontScale:1, defaultTab:"ikioi", ngWords:[] });
+      toast("初期化しました");
+      location.hash = "";
+    });
+    $("#sSave").addEventListener("click", ()=>{
+      const ng = $("#sNg").value.split("\n").map(s=>s.trim()).filter(Boolean).slice(0,50);
+      const tabBtn = $("#sTab").querySelector('[aria-pressed="true"]');
+      Prefs.set({
+        nick: $("#sNick").value.trim().slice(0,24),
+        defaultTab: tabBtn ? tabBtn.dataset.v : "ikioi",
+        ngWords: ng,
+      });
+      toast("設定を保存しました");
+      location.hash = "";
+    });
   }
 
   function sortedThreads(){
@@ -905,6 +1100,7 @@ img{ max-width:100%; }
     elBanner.style.display = "none";
     elSearch.classList.remove("open");
     $("#hdrSearch").style.display = "none";
+    $("#hdrSettings").style.display = "none";
     window.scrollTo(0,0);
 
     root.innerHTML = `<div class="loading"><div class="spinner"></div>読み込み中…</div>`;
@@ -933,13 +1129,16 @@ img{ max-width:100%; }
     const isOp = p.num === 1;
     const sage = /sage/i.test(p.email||"");
     const n = counts[p.uid]||1;
+    const ng = (Prefs.get().ngWords||[]);
+    const isNg = !p.abone && ng.length && ng.some(w => w && (p.body||"").includes(w));
+    const abone = p.abone || isNg;
     const idCls = n>=3 ? "many" : "";
     const idTxt = n>1 ? `ID:${esc(p.uid)} (${n})` : `ID:${esc(p.uid)}`;
     const nameDisp = sage
       ? parseName(p.name)
       : `<a href="mailto:" onclick="return false" style="color:inherit">${parseName(p.name)}</a>`;
     return `
-      <div class="post ${p.abone?"abone":""}" id="p${p.num}" data-num="${p.num}">
+      <div class="post ${abone?"abone":""}" id="p${p.num}" data-num="${p.num}">
         <div class="post__head">
           <span class="post__num ${isOp?"op":""}" data-reply="${p.num}">${p.num}</span>
           <span class="post__name">${nameDisp}</span>
@@ -947,7 +1146,7 @@ img{ max-width:100%; }
           <span class="post__date">${esc(p.date)}</span>
           <span class="post__id ${idCls}" data-uid="${esc(p.uid)}">${idTxt}</span>
         </div>
-        <div class="post__body">${p.abone?"あぼ〜ん":renderBody(p.body)}</div>
+        <div class="post__body">${abone?"あぼ〜ん":renderBody(p.body)}</div>
         <div class="post__foot">
           <span class="post__reply" data-reply="${p.num}">↩ 返信</span>
         </div>
@@ -1040,7 +1239,7 @@ img{ max-width:100%; }
     err.classList.remove("show");
     const bodyV = $("#fBody").value.trim();
     if (!bodyV){ show("本文を入力してください"); return; }
-    const name = "", mail = "";
+    const name = Prefs.get().nick || "", mail = "";
     const btn = $("#cSubmit"); btn.disabled = true; btn.textContent = "送信中…";
     try{
       if (mode==="thread"){
@@ -1117,6 +1316,7 @@ img{ max-width:100%; }
   // header buttons
   elBack.addEventListener("click", ()=>{ if (history.length>1) history.back(); else location.hash=""; });
   elBrand.addEventListener("click", ()=>{ location.hash=""; });
+  $("#hdrSettings").addEventListener("click", ()=>{ location.hash="#/settings"; });
   $("#hdrSearch").addEventListener("click", ()=>{
     elSearch.classList.toggle("open");
     if (elSearch.classList.contains("open")) $("#searchInput").focus();
@@ -1215,13 +1415,16 @@ img{ max-width:100%; }
     const wrap = $("#rulesWrap");
     if (!wrap) return;
     const chk = $("#rulesChk"), ok = $("#rulesOk"), again = $("#rulesAgain");
+    const nick = $("#rulesNick");
     const KEY = "bochannel_rules_agreed_v1";
     function open(force){
       if (!force){ try{ if (localStorage.getItem(KEY)) return; }catch(_){} }
       chk.checked = false; ok.disabled = true;
+      if (nick) nick.value = Prefs.get().nick || "";
       wrap.classList.add("open");
     }
     function close(){
+      if (nick) Prefs.set({ nick: nick.value.trim().slice(0,24) });
       wrap.classList.remove("open");
       try{ localStorage.setItem(KEY, String(Date.now())); }catch(_){}
     }
@@ -1234,6 +1437,7 @@ img{ max-width:100%; }
   })();
 
   // boot
+  state.tab = Prefs.get().defaultTab || "ikioi";
   paintTabs();
   route();
 })();
